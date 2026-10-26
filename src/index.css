@@ -17,11 +17,11 @@
   -webkit-text-size-adjust: 100%;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; background: var(--bg); overscroll-behavior: none; }
+html, body { margin: 0; background: var(--bg); overscroll-behavior: none; overflow-x: hidden; }
 a { color: var(--acc); cursor: pointer; }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
-.app { min-height: 100vh; max-width: 1100px; margin: 0 auto; }
+.app { min-height: 100vh; max-width: 1100px; margin: 0 auto; overflow-x: hidden; }
 
 /* Solid fixed header (Jackie convention) */
 .top {
@@ -126,8 +126,8 @@ button { cursor: pointer; }
 .field em { font-style: normal; font-weight: 700; color: #94a3b8; font-size: 13px; }
 
 .chartcard { padding: 8px 6px 12px; }
-.chartwrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.chartwrap svg { display: block; touch-action: manipulation; }
+.chartwrap { width: 100%; overflow: hidden; overscroll-behavior-x: none; }
+.chartwrap svg { display: block; max-width: 100%; touch-action: pan-y; }
 .ribbon { cursor: pointer; transition: opacity .15s; mix-blend-mode: multiply; }
 .node { cursor: pointer; }
 .node.sel rect:nth-child(2) { stroke: #0f172a; stroke-width: 2; }

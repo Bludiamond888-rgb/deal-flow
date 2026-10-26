@@ -41,3 +41,14 @@ Cap 8.70% · CoC 10.29% · YoC 8.54% · DSCR 1.77x · IRR ~30.0% · EM 3.29x
 ## Git
 
 Local commit only — **no push / no publish.**
+
+## Fix — lock horizontal pan (2026-10-26)
+
+Jackie (Chairman): chart/page must not move side-by-side.
+
+- `.chartwrap`: `overflow: hidden` (was `overflow-x: auto`) + `overscroll-behavior-x: none`
+- chart SVG: `touch-action: pan-y` (vertical page scroll OK; no horizontal pan)
+- `html, body` + `.app`: `overflow-x: hidden`
+- No d3-zoom; SVG width still matches container via ResizeObserver
+
+Verified (WebKit 440×956): wrap/html scrollWidth == clientWidth; forced `scrollLeft`/`scrollX` stay 0.
