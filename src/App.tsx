@@ -13,9 +13,10 @@ import {
   saveNamed,
   type SavedDeal,
 } from './storage'
+import { GLOSSARY, GLOSSARY_GROUPS } from './glossary'
 import type { DealInputs } from './types'
 
-type View = 'flow' | 'saved' | 'about'
+type View = 'flow' | 'saved' | 'glossary' | 'about'
 
 function pctInput(raw: number): number {
   return Math.round(raw * 10000) / 100
@@ -116,14 +117,16 @@ export default function App() {
         </div>
       </header>
 
-      <div className="metrics" data-testid="metrics">
-        <Chip k="Cap Rate" v={pct(r.proFormaCap)} />
-        <Chip k="CoC" v={pct(r.cashOnCash)} />
-        <Chip k="YoC" v={pct(r.yieldOnCost)} />
-        <Chip k="DSCR" v={r.dscr ? r.dscr.toFixed(2) + 'x' : '—'} warn={r.warnDscr} />
-        <Chip k="IRR" v={Number.isFinite(r.leveredIrr) ? pct(r.leveredIrr, 1) : '—'} />
-        <Chip k="Eq. Mult." v={r.equityMultiple ? r.equityMultiple.toFixed(2) + 'x' : '—'} />
-      </div>
+      {view === 'flow' && (
+        <div className="metrics" data-testid="metrics">
+          <Chip k="Cap Rate" v={pct(r.proFormaCap)} />
+          <Chip k="CoC" v={pct(r.cashOnCash)} />
+          <Chip k="YoC" v={pct(r.yieldOnCost)} />
+          <Chip k="DSCR" v={r.dscr ? r.dscr.toFixed(2) + 'x' : '—'} warn={r.warnDscr} />
+          <Chip k="IRR" v={Number.isFinite(r.leveredIrr) ? pct(r.leveredIrr, 1) : '—'} />
+          <Chip k="Eq. Mult." v={r.equityMultiple ? r.equityMultiple.toFixed(2) + 'x' : '—'} />
+        </div>
+      )}
 
       {view === 'flow' && (
         <main className="content" data-testid="flow">
@@ -321,7 +324,7 @@ export default function App() {
       )}
 
       {view === 'saved' && (
-        <main className="content" data-testid="saved">
+        <main className="content no-metrics" data-testid="saved">
           <div className="search">
             <input
               value={q}
@@ -374,8 +377,32 @@ export default function App() {
         </main>
       )}
 
+      {view === 'glossary' && (
+        <main className="content no-metrics" data-testid="glossary">
+          <h2 className="section-title">Terms</h2>
+          <p className="fine" style={{ margin: '0 0 8px' }}>
+            Plain-English definitions for every key input, sticky metric, and income / cash-flow line in this
+            back-of-envelope (BOE).
+          </p>
+          <div className="glossary">
+            {GLOSSARY_GROUPS.map((g) => (
+              <section key={g.id} className="glossary-group">
+                <h3>{g.title}</h3>
+                {GLOSSARY.filter((e) => e.group === g.id).map((e) => (
+                  <article key={e.id} className="g-item">
+                    <b>{e.term}</b>
+                    <p>{e.text}</p>
+                    {e.tip ? <p className="tip">{e.tip}</p> : null}
+                  </article>
+                ))}
+              </section>
+            ))}
+          </div>
+        </main>
+      )}
+
       {view === 'about' && (
-        <main className="content about" data-testid="about">
+        <main className="content no-metrics about" data-testid="about">
           <button className="ghost" onClick={() => setView('flow')}>
             ← Back
           </button>
@@ -419,6 +446,49 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <nav className="tabs" data-testid="tabs">
+        <button
+          type="button"
+          className={view === 'flow' ? 'on' : ''}
+          onClick={() => {
+            setView('flow')
+            window.scrollTo(0, 0)
+          }}
+        >
+          <span className="ic">〰</span>Flow
+        </button>
+        <button
+          type="button"
+          className={view === 'saved' ? 'on' : ''}
+          onClick={() => {
+            setView('saved')
+            window.scrollTo(0, 0)
+          }}
+        >
+          <span className="ic">▤</span>Saved
+        </button>
+        <button
+          type="button"
+          className={view === 'glossary' ? 'on' : ''}
+          onClick={() => {
+            setView('glossary')
+            window.scrollTo(0, 0)
+          }}
+        >
+          <span className="ic">☰</span>Terms
+        </button>
+        <button
+          type="button"
+          className={view === 'about' ? 'on' : ''}
+          onClick={() => {
+            setView('about')
+            window.scrollTo(0, 0)
+          }}
+        >
+          <span className="ic">ⓘ</span>About
+        </button>
+      </nav>
 
       {toast && <div className="toast">{toast}</div>}
     </div>

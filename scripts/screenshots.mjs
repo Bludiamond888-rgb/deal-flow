@@ -54,10 +54,18 @@ await page.waitForSelector('[data-testid="saved"]')
 await page.waitForSelector('.saved li')
 await shot('06-saved-list')
 
-// about
-await page.click('button[title="About"]')
+// glossary / terms tab (wait out save toast first)
+await page.waitForTimeout(1600)
+await page.click('[data-testid="tabs"] >> text=Terms')
+await page.waitForSelector('[data-testid="glossary"]')
+await page.waitForSelector('.g-item')
+await page.waitForSelector('.toast', { state: 'detached' }).catch(() => {})
+await shot('07-glossary')
+
+// about tab
+await page.click('[data-testid="tabs"] >> text=About')
 await page.waitForSelector('[data-testid="about"]')
-await shot('07-about')
+await shot('08-about')
 
 const sw = await page.evaluate(() => navigator.serviceWorker?.getRegistration().then((r) => !!r))
 console.log('sw registered:', sw, 'errors:', errs.length ? errs : 'none')

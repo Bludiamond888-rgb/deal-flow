@@ -32,7 +32,8 @@ Cap 8.70% · CoC 10.29% · YoC 8.54% · DSCR 1.77x · IRR ~30.0% · EM 3.29x
 - `/workspace/deal-flow/screens/04-inputs.png`
 - `/workspace/deal-flow/screens/05-monthly.png`
 - `/workspace/deal-flow/screens/06-saved-list.png`
-- `/workspace/deal-flow/screens/07-about.png`
+- `/workspace/deal-flow/screens/07-glossary.png`
+- `/workspace/deal-flow/screens/08-about.png`
 
 ## Tests
 
@@ -52,3 +53,12 @@ Jackie (Chairman): chart/page must not move side-by-side.
 - No d3-zoom; SVG width still matches container via ResizeObserver
 
 Verified (WebKit 440×956): wrap/html scrollWidth == clientWidth; forced `scrollLeft`/`scrollX` stay 0.
+
+## Fix — key inputs right-edge clip + Terms glossary (2026-10-26)
+
+Jackie (Chairman): right side of key inputs cut off on iPhone Home Screen (~440); add glossary tab.
+
+- Root cause: CSS Grid default `min-width: auto` let long number values (e.g. purchase price) expand both `1fr` columns past the viewport (app scrollWidth 568 vs 440).
+- `.igrid`: `repeat(2, minmax(0, 1fr))`; `.field` / `.fin` / inputs get `min-width: 0`; hide WebKit number spinners; `overflow: hidden` on `.fin`.
+- Bottom tabs (Flow · Saved · Terms · About); sticky header/metrics unchanged on Flow. Terms = plain-English BOE glossary (`src/glossary.ts`) for every key input, sticky metric, and flow line.
+- Verified WebKit 440×956: app scrollWidth == 440; right-column `.fin` right edge at 412 (14px card + 14px content inset). **Not published.**

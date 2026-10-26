@@ -11,6 +11,7 @@
   --navy2: #1e293b;
   --head: 56px;
   --metrics: 72px;
+  --tab: 56px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
   color: var(--ink);
   background: var(--bg);
@@ -72,8 +73,11 @@ button { cursor: pointer; }
 .content {
   padding: calc(env(safe-area-inset-top) + var(--head) + var(--metrics) + 12px)
     max(14px, env(safe-area-inset-right))
-    calc(env(safe-area-inset-bottom) + 28px)
+    calc(env(safe-area-inset-bottom) + var(--tab) + 28px)
     max(14px, env(safe-area-inset-left));
+}
+.content.no-metrics {
+  padding-top: calc(env(safe-area-inset-top) + var(--head) + 14px);
 }
 
 .search { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -114,16 +118,25 @@ button { cursor: pointer; }
   margin: 12px 0; box-shadow: 0 1px 3px #0f172a0d, 0 8px 24px #0f172a08;
 }
 .card.inputs h3 { margin: 0 0 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--mut); }
-.igrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-@media (min-width: 720px) { .igrid { grid-template-columns: repeat(4, 1fr); } }
-.field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 650; color: var(--mut); }
-.field .fin { display: flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid var(--line); border-radius: 11px; padding: 0 10px; }
-.field input {
-  flex: 1; border: 0; background: transparent; padding: 11px 0; font-size: 16px;
-  font-weight: 700; color: var(--ink); outline: none; min-width: 0;
-  font-variant-numeric: tabular-nums;
+.igrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+@media (min-width: 720px) { .igrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 650; color: var(--mut); min-width: 0; max-width: 100%; }
+.field .fin {
+  display: flex; align-items: center; gap: 4px; min-width: 0; width: 100%;
+  background: #f8fafc; border: 1px solid var(--line); border-radius: 11px;
+  padding: 0 10px; overflow: hidden;
 }
-.field em { font-style: normal; font-weight: 700; color: #94a3b8; font-size: 13px; }
+.field input {
+  flex: 1 1 0; border: 0; background: transparent; padding: 11px 0; font-size: 16px;
+  font-weight: 700; color: var(--ink); outline: none; min-width: 0; width: 100%;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.field input::-webkit-outer-spin-button,
+.field input::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.field em { font-style: normal; font-weight: 700; color: #94a3b8; font-size: 13px; flex: none; }
 
 .chartcard { padding: 8px 6px 12px; }
 .chartwrap { width: 100%; overflow: hidden; overscroll-behavior-x: none; }
@@ -207,6 +220,40 @@ button { cursor: pointer; }
   transform: translateX(-50%); z-index: 60;
   background: var(--ink); color: #fff; font-weight: 700; font-size: 14px;
   padding: 10px 16px; border-radius: 99px; box-shadow: 0 8px 24px #0f172a33;
+}
+
+
+/* Bottom tabs (iPhone-first) */
+.tabs {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+  background: #fff; border-top: 1px solid var(--line);
+  display: flex; padding-bottom: env(safe-area-inset-bottom);
+  max-width: 1100px; margin: 0 auto;
+}
+.tabs button {
+  flex: 1; height: var(--tab); border: 0; background: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: 11px; font-weight: 650; color: #94a3b8;
+}
+.tabs button.on { color: var(--navy); }
+.tabs .ic { font-size: 17px; line-height: 1; }
+
+.glossary { display: grid; gap: 10px; }
+.glossary-group { margin: 0; }
+.glossary-group h3 {
+  margin: 14px 0 8px; font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--mut);
+}
+.glossary-group:first-child h3 { margin-top: 4px; }
+.g-item {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; margin: 0 0 8px;
+}
+.g-item b { display: block; font-size: 15px; letter-spacing: -.01em; margin-bottom: 4px; }
+.g-item p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #334155; }
+.g-item .tip {
+  margin: 8px 0 0; padding: 8px 10px; border-radius: 10px;
+  background: #eef2ff; color: #3730a3; font-size: 12.5px; line-height: 1.4;
 }
 
 @keyframes up { from { transform: translateY(40px); opacity: .5 } }
