@@ -1,64 +1,38 @@
-# Deal Flow v1 — Report
+# Deal Flow — Report (money input formatting)
 
-**Status:** Implemented + tested + screenshots. **NOT published.**
+**Status:** Implemented + tested + screenshots. **NOT published.** Awaiting Chairman Publish widget.
 
 **Path:** `/workspace/deal-flow`  
-**Visual twin of:** Earnings Flow (`/workspace/earnings-flow`)  
-**Math twin of:** Deal Pro Forma (`/workspace/deal-proforma`) — identical `calc.ts` incl. IRR
+**Live (confirm only — this change not pushed):** https://bludiamond888-rgb.github.io/deal-flow/
 
-## How it differs from Deal Pro Forma
+## Fix: purchase price / money inputs
 
-| | Deal Pro Forma | Deal Flow |
-|---|---|---|
-| Primary UI | Form-first tabs (deal / saved / more) | Chart-first Sankey (Earnings Flow chrome) |
-| Visual | Metric dash + long form sections | Income/cash-flow Sankey + sticky metric chips |
-| Inputs | Full BOE form | Key inputs panel (price, LTV, rent, vacancy, hold…) live-updating the chart |
-| Shared | Same formulas, demo deal, localStorage pattern, PWA, vitest, WebKit screens | Same |
+Bug (Chairman): editing purchase price left a leading zero (`$ 02000`) and large $ values lacked thousand separators.
 
-## Flow nodes
+| Behavior | Detail |
+|---|---|
+| No leading zeros | `sanitizeDraft('02000')` → `2000` while typing |
+| Commas on blur | `$25,000,000`, `$1,225`, `$2,000` via `formatGrouped` |
+| Edit UX | Strip commas on focus; select-all; reformat on blur; parse for live calc |
+| Empty ok | Clearing the field is allowed while editing |
+| Scope | Purchase price + avg rent (`format="money"`); % fields plain; units/hold plain numbers |
+| PWA | Still iPhone Home Screen friendly; prior no-horizontal-clip grid (`minmax(0,1fr)`) kept |
 
-GPR → Vacancy → EGI → OpEx buckets → NOI → Debt Service → BTCF  
-Below-the-line pills: Total equity, Capex, Net sale proceeds, Equity reversion
+Helpers live in `src/format.ts` (`sanitizeDraft`, `parseDraft`, `toEditDraft`, `formatGrouped`). Field uses `type="text"` + `inputMode="decimal"` (not native `type="number"`).
 
-## Demo metrics (111 First Street)
-
-Cap 8.70% · CoC 10.29% · YoC 8.54% · DSCR 1.77x · IRR ~30.0% · EM 3.29x
+Sibling **Deal Pro Forma** got the same pattern (`src/numInput.ts`).
 
 ## Screenshots (WebKit 440×956 @3)
 
-- `/workspace/deal-flow/screens/01-flow-top.png`
-- `/workspace/deal-flow/screens/02-sankey.png`
-- `/workspace/deal-flow/screens/03-node-detail.png`
-- `/workspace/deal-flow/screens/04-inputs.png`
-- `/workspace/deal-flow/screens/05-monthly.png`
-- `/workspace/deal-flow/screens/06-saved-list.png`
-- `/workspace/deal-flow/screens/07-glossary.png`
-- `/workspace/deal-flow/screens/08-about.png`
+- `screens/04-inputs.png` — `$25,000,000` / `$1,225` with commas
+- `screens/04b-price-editing.png` — typing `02000` cleans to `2000` (no leading 0)
+- `screens/04c-price-formatted.png` — blur → `$2,000`
+- plus existing flow / sankey / saved / terms / about shots
 
 ## Tests
 
-`npm test` — **21/21** passed (calc + flow graph).
+`npm test` — **30/30** passed (calc + flow + format helpers).
 
 ## Git
 
-Local commit only — **no push / no publish.**
-
-## Fix — lock horizontal pan (2026-10-26)
-
-Jackie (Chairman): chart/page must not move side-by-side.
-
-- `.chartwrap`: `overflow: hidden` (was `overflow-x: auto`) + `overscroll-behavior-x: none`
-- chart SVG: `touch-action: pan-y` (vertical page scroll OK; no horizontal pan)
-- `html, body` + `.app`: `overflow-x: hidden`
-- No d3-zoom; SVG width still matches container via ResizeObserver
-
-Verified (WebKit 440×956): wrap/html scrollWidth == clientWidth; forced `scrollLeft`/`scrollX` stay 0.
-
-## Fix — key inputs right-edge clip + Terms glossary (2026-10-26)
-
-Jackie (Chairman): right side of key inputs cut off on iPhone Home Screen (~440); add glossary tab.
-
-- Root cause: CSS Grid default `min-width: auto` let long number values (e.g. purchase price) expand both `1fr` columns past the viewport (app scrollWidth 568 vs 440).
-- `.igrid`: `repeat(2, minmax(0, 1fr))`; `.field` / `.fin` / inputs get `min-width: 0`; hide WebKit number spinners; `overflow: hidden` on `.fin`.
-- Bottom tabs (Flow · Saved · Terms · About); sticky header/metrics unchanged on Flow. Terms = plain-English BOE glossary (`src/glossary.ts`) for every key input, sticky metric, and flow line.
-- Verified WebKit 440×956: app scrollWidth == 440; right-column `.fin` right edge at 412 (14px card + 14px content inset). **Not published.**
+Local commit only. **Do not push / do not publish** until Chairman Publish widget.

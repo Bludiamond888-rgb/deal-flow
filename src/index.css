@@ -122,7 +122,7 @@ button { cursor: pointer; }
 @media (min-width: 720px) { .igrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 650; color: var(--mut); min-width: 0; max-width: 100%; }
 .field .fin {
-  display: flex; align-items: center; gap: 4px; min-width: 0; width: 100%;
+  display: flex; align-items: center; gap: 2px; min-width: 0; width: 100%;
   background: #f8fafc; border: 1px solid var(--line); border-radius: 11px;
   padding: 0 10px; overflow: hidden;
 }

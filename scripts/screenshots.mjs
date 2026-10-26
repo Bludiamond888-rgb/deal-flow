@@ -39,6 +39,23 @@ await page.click('.close')
 await page.locator('[data-testid="inputs"]').scrollIntoViewIfNeeded()
 await shot('04-inputs')
 
+// money format: purchase price shows commas; typing leading zeros cleans up
+const price = page.locator('[data-testid="inputs"] .field', { hasText: 'Purchase price' }).locator('input')
+await price.click()
+await price.fill('02000')
+await page.waitForTimeout(200)
+await shot('04b-price-editing')
+await price.evaluate((el) => el.blur())
+await page.waitForTimeout(250)
+const shown = await price.inputValue()
+if (shown !== '2,000') throw new Error(`expected 2,000 after blur, got ${JSON.stringify(shown)}`)
+await shot('04c-price-formatted')
+// restore demo purchase price
+await price.click()
+await price.fill('25000000')
+await price.evaluate((el) => el.blur())
+await page.waitForTimeout(200)
+
 // monthly toggle
 await page.click('.seg >> text=Monthly')
 await page.waitForTimeout(300)

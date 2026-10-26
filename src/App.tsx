@@ -3,7 +3,17 @@ import { Chart, COLORS } from './Chart'
 import { compute } from './calc'
 import { DEMO_DEAL } from './demo'
 import { buildDealFlow, type FLink, type FNode } from './flow'
-import { money, moneyFull, pct, num } from './format'
+import {
+  money,
+  moneyFull,
+  pct,
+  num,
+  sanitizeDraft,
+  parseDraft,
+  toEditDraft,
+  formatGrouped,
+  type NumFormat,
+} from './format'
 import {
   deleteSaved,
   listSaved,
@@ -190,24 +200,27 @@ export default function App() {
                 <Field
                   label="Purchase price"
                   prefix="$"
+                  format="money"
                   value={deal.purchasePrice}
                   onChange={(v) => patch('purchasePrice', v)}
                 />
                 <Field
                   label="Units"
+                  format="number"
                   value={deal.units}
                   onChange={(v) => patch('units', Math.round(v))}
                 />
                 <Field
                   label="LTV %"
                   suffix="%"
+                  format="percent"
                   value={pctInput(deal.ltvLtcPct)}
                   onChange={(v) => patch('ltvLtcPct', fromPctInput(v))}
-                  step="0.1"
                 />
                 <Field
                   label="Avg rent / mo"
                   prefix="$"
+                  format="money"
                   value={deal.avgRentMonthly + deal.rentPremiumMonthly}
                   onChange={(v) => {
                     patch('avgRentMonthly', v)
@@ -217,32 +230,33 @@ export default function App() {
                 <Field
                   label="Vacancy %"
                   suffix="%"
+                  format="percent"
                   value={pctInput(deal.vacancyPct)}
                   onChange={(v) => patch('vacancyPct', fromPctInput(v))}
-                  step="0.1"
                 />
                 <Field
                   label="Hold years"
+                  format="number"
                   value={deal.holdYears}
                   onChange={(v) => patch('holdYears', Math.max(0, Math.round(v)))}
                 />
                 <Field
                   label="Interest rate"
                   suffix="%"
+                  format="percent"
                   value={pctInput(deal.interestRate)}
                   onChange={(v) => patch('interestRate', fromPctInput(v))}
-                  step="0.05"
                 />
                 <Field
                   label="Market / exit cap"
                   suffix="%"
+                  format="percent"
                   value={pctInput(deal.residualCapRate || deal.marketCapRate)}
                   onChange={(v) => {
                     const x = fromPctInput(v)
                     patch('marketCapRate', x)
                     patch('residualCapRate', x)
                   }}
-                  step="0.05"
                 />
               </div>
             </section>
@@ -517,30 +531,49 @@ function Field({
   label,
   value,
   onChange,
-  step,
   prefix,
   suffix,
+  format = 'number',
 }: {
   label: string
   value: number
   onChange: (v: number) => void
-  step?: string
   prefix?: string
   suffix?: string
+  format?: NumFormat
 }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const allowDec = true
+
+  const shown = editing ? draft : formatGrouped(Number.isFinite(value) ? value : 0, format)
+
   return (
     <label className="field">
       {label}
       <span className="fin">
         {prefix ? <em>{prefix}</em> : null}
         <input
-          type="number"
+          type="text"
           inputMode="decimal"
-          step={step ?? 'any'}
-          value={Number.isFinite(value) ? value : 0}
+          autoComplete="off"
+          enterKeyHint="done"
+          value={shown}
+          onFocus={(e) => {
+            setEditing(true)
+            setDraft(toEditDraft(Number.isFinite(value) ? value : 0, allowDec))
+            requestAnimationFrame(() => e.target.select())
+          }}
+          onBlur={() => {
+            setEditing(false)
+            const n = parseDraft(draft)
+            onChange(n)
+            setDraft('')
+          }}
           onChange={(e) => {
-            const n = e.target.value === '' ? 0 : Number(e.target.value)
-            if (!Number.isNaN(n)) onChange(n)
+            const next = sanitizeDraft(e.target.value, allowDec)
+            setDraft(next)
+            onChange(parseDraft(next))
           }}
         />
         {suffix ? <em>{suffix}</em> : null}
